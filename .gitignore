@@ -38,3 +38,6 @@ lib
 .DS_Store
 
 # Yarn
+
+# Other
+test
