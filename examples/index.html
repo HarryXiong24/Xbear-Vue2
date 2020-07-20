@@ -7,7 +7,14 @@
 </head>
 <body>
   <div id="app">
-    hello
+    <h1>插值表达式演示</h1>
+    <h3>id: {{ id }}</h3>
+    <h3>msg: {{ msg }}</h3>
+    <h1>v-text演示</h1>
+    <div v-text="msg"></div>
+    <h1>v-model演示</h1>
+    <input type="text" v-model="id">
+    <input type="text" v-model="msg">
   </div>
 </body>
 

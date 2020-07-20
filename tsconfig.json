@@ -10,7 +10,6 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "noImplicitReturns": true,
     "noUnusedLocals": true,
     "esModuleInterop": true
   },
