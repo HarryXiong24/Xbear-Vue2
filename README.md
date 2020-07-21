@@ -1,16 +1,10 @@
-# Typescript-Webpack-Start
+# Mini-TS-Vue
 
 ## Description
 
-A template for quickly developing projects with Typescript and Webpack.
+A mini-vue framework developed by Typescript.
 
 ## Usage
-
-```bash
-# Clone it from Github.
-$ git clone https://github.com/HarryXiong24/typescript-webpack-start.git
-$ cd typescript-webpack-start
-```
 
 ```bash
 # If you want to use yarn.

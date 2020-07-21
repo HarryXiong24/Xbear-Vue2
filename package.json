@@ -15,7 +15,7 @@
     "commit": "git-cz"
   },
   "repository": "",
-  "keywords": [],
+  "keywords": ["mini-vue"],
   "author": "HarryXiong",
   "license": "MIT",
   "bugs": {},
