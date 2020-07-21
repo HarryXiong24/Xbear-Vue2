@@ -4,15 +4,15 @@ import Dep from './dep';
  * 自身实例化的时候往 dep 对象中添加自己
  */
 class Watcher {
-  private vm: any
+  public vm: any
   // data 中的属性名称
-  private key: string
+  public key: string
   // 当数据变化的时候，调用 callback 更新视图
-  private callback: Function
+  public callback: any
   // 原来的旧值
-  private oldValue: any
+  public oldValue: any
 
-  constructor (vm: any, key: string, callback: Function) {
+  constructor (vm: any, key: string, callback: any) {
     this.vm = vm
     this.key = key
     this.callback = callback
@@ -25,7 +25,7 @@ class Watcher {
   }
 
   // 当数据发生变化的时候，更新视图
-  updated () {
+  update () {
     let newValue = this.vm[this.key]
     if (this.oldValue === newValue) {
       return

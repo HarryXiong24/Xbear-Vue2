@@ -1,9 +1,9 @@
 /**
  *  Compiler测试
  */
-import vue from '../../src/core/vue'
+import Vue from '../../src/core/vue'
 
-let vm = new vue({
+let vm = new Vue({
   el: "#app",
   data: {
     id: '000001',
@@ -11,7 +11,7 @@ let vm = new vue({
     person: {
       name: "harry"
     }
-  } 
+  }
 })
 
 console.log(vm)

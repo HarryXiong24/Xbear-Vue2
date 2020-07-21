@@ -23,29 +23,7 @@ class Observer {
     Object.keys(data).forEach( (key) => {
       this.defineReactive(data, key, data[key])
     })
-
-    // let vm: any = this.defineReactive(data)
-    // Object.assign(data, vm)
   }
-
-  // defineReactive (obj: any) {
-  //   const that = this
-  //   return new Proxy(obj, {
-  //     get (target, key) {
-  //       return target[key]
-  //     },
-  //     set (target, key, newValue: any) {
-  //       if (newValue === target[key]) {
-  //         return true
-  //       }
-  //       // 如果 newValue 是对象，设置 newValue 的成员为响应式
-  //       that.walk(newValue)
-  //       target[key] = newValue
-  //       return true
-  //     }
-  //   })
-  // }
-
   // 定义响应式成员
   defineReactive (obj: any, key: string, val: any) {
     const that = this
@@ -65,10 +43,10 @@ class Observer {
         if (newValue === val) {
           return
         }
+        val = newValue
         // 如果 newValue 是对象，设置 newValue 的成员为响应式
         // 使用that的原因是set里面存在自己的this
         that.walk(newValue)
-        val = newValue
         // 发送依赖
         dep.notify()
       }

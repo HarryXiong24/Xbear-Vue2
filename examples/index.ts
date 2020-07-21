@@ -10,4 +10,4 @@
 // import './3.dep-watcher/test'
 // import './4.proxyData/test'
 // import './5.observer/test'
-import './6.compiler/test'
+import './6.vue/test'

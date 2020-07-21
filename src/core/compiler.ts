@@ -6,8 +6,8 @@ import Watcher from './watcher';
  * 当数据变化后重新渲染视图
  */
 class Compiler {
-  private vm: any
-  private el: any
+  public vm: any
+  public el: any
 
   constructor (vm: any) {
     this.vm = vm  
@@ -18,9 +18,9 @@ class Compiler {
   // 编译模板，处理文本节点和元素节点
   compile (el: HTMLElement) {
     // 获取所有子节点
-    const nodes = el.childNodes
+    let childNodes = el.childNodes
     // 转化成真数组
-    Array.from(nodes).forEach((node: any) => {
+    Array.from(childNodes).forEach((node: any) => {
       // 判断是文本节点还是元素节点
       if (this.isTextNode(node)) {
         this.compileText(node)
@@ -49,7 +49,7 @@ class Compiler {
         // 截取属性的名称，v-text --> text，v-model --> model
         attrName = attrName.substr(2)
         // 获取属性的名称，属性的名称就是我们数据对象的属性 v-text = "name"，获取的是 name
-        const key = attr.value
+        let key = attr.value
         // 处理不同的指令
         this.update(node, key, attrName)
       }
@@ -64,7 +64,7 @@ class Compiler {
       return 
     }
     // 获取文本节点的内容
-    const value = node.textContent
+    let value = node.textContent
     if (reg.test(value)) {
       // 插值表达式中的值就是我们要的属性名称
       // RegExp.$1获取第一个匹配的内容
@@ -117,6 +117,10 @@ class Compiler {
     // 创建Watcher对象
     new Watcher(this.vm, key, (newValue: any) => {
       node.value = newValue
+    })
+    // 双向绑定
+    node.addEventListener('input', () => {
+      this.vm[key] = node.value
     })
   }
 }

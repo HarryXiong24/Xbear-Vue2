@@ -3,7 +3,7 @@
  * 通知所有观察者
  */
 class Dep {
-  private subs: any[]
+  public subs: any[]
   public static target: any
 
   constructor() {
