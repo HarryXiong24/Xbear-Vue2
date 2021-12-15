@@ -79,62 +79,64 @@ Observer 的作用其实就是让 data 里的数据全部被监听，被代理�
 而其中的使用的方法则是 defineProperty(Vue2)，proxy(Vue3)。
 
 ```ts
-import Dep from './Dep';
-
 /**
  * Observer 类会附加到一个被侦测的 object 上
  * 一旦被附加上，Observer 会将 object 的所有属性转换为 getter/setter 的形式
  * 从而来收集依赖，并且当属性发生变化的时候，会通知这些依赖
  */
-export default class Observer {
-  private value: any;
-
-  constructor(value: any) {
-    this.value = value;
-    // value 只可能是数组和对象
-    if (!Array.isArray(value)) {
-      this.walk(value);
-    }
-  }
-
-  /**
-   * 数据代理
-   */
-  defineReactive(data: Record<string, any>, key: PropertyKey, value: any) {
-    // 如果 value 是对象，就需要递归，让对象里每一个属性都转换成 getter/setter 的形式来侦测变化
-    if (typeof value === 'object') {
-      this.walk(value);
-    }
-    let dep = new Dep();
-    Object.defineProperty(data, key, {
-      enumerable: true,
-      configurable: true,
-      get() {
-        dep.depend();
-        return value;
-      },
-      set(newValue) {
-        if ((value = newValue)) {
-          return;
-        }
-        value = newValue;
-        dep.notify();
-      },
-    });
+class Observer {
+  constructor(data: Record<string, any>) {
+    this.walk(data);
   }
 
   /**
    * walk 会将每一个属性都转换成 getter/setter 的形式来侦测变化
    * 这个方式只有在数据类型为 Object 的时候才会被调用
    */
-  walk(obj: Record<string, any>) {
-    const keys = Object.keys(obj);
-    // 递归
-    for (let i = 0; i < keys.length; i++) {
-      this.defineReactive(obj, keys[i], obj[keys[i]]);
+  walk(data: Record<string, any>): void {
+    // 判断数据是否是对象，如果不是对象返回
+    if (!data || typeof data !== 'object') {
+      return;
     }
+    // 如果是对象，遍历对象的所有属性，设置为 getter/setter
+    Object.keys(data).forEach((key) => {
+      this.defineReactive(data, key, data[key]);
+    });
+  }
+
+  /**
+   * 数据代理
+   */
+  defineReactive(obj: Record<string, any>, key: string, value: any) {
+    const that = this;
+    // 收集依赖，发送通知
+    let dep = new Dep();
+    // 如果 value 是对象，继续设置它里面的成员为响应式数据
+    this.walk(value);
+    Object.defineProperty(obj, key, {
+      configurable: true,
+      enumerable: true,
+      get() {
+        // 收集依赖
+        Dep.target && dep.addSub(Dep.target);
+        return value;
+      },
+      set(newValue) {
+        if (newValue === value) {
+          return;
+        }
+        value = newValue;
+        // 如果 newValue 是对象，设置 newValue 的成员为响应式
+        // 使用 that 的原因是 set 里面存在自己的 this
+        that.walk(newValue);
+        // 发送依赖
+        dep.notify();
+      },
+    });
   }
 }
+
+export default Observer;
 ```
 
 #### {{ }} -> Watcher 订阅者
@@ -149,65 +151,45 @@ export default class Observer {
 2. 接收到通知，执行更新函数。
 
 ```ts
+import Dep from './Dep';
+import { VueType } from './Vue';
 /**
- * 解析 data.a.b.c，返回一个函数
- * 用例：
- * const vm = {
- *   a: {
- *     b: {
- *       c: 1,
- *     },
- *   },
- * };
- *
- * const func = parsePath('a.b')!;
- * console.log(func(vm));   // { c: 1 }
+ * 当数据变化触发依赖，dep 通知所有的 Watcher 实例更新视图
+ * 自身实例化的时候往 dep 对象中添加自己
  */
-export function parsePath(path: any) {
-  const bailRE = /[^\w.$]/;
-  if (bailRE.test(path)) {
-    return;
-  }
-  const segments = path.split('.');
-  return function (obj: Record<string, any>) {
-    for (let i = 0; i < segments.length; i++) {
-      if (!obj) {
-        return;
-      }
-      obj = obj[segments[i]];
-    }
-    return obj;
-  };
-}
+class Watcher {
+  // Vue 实例
+  public vm: VueType;
+  // data 中的属性名称
+  public key: string;
+  // 当数据变化的时候，调用 callback 更新视图
+  public callback: (newValue: any) => any;
+  // 原来的旧值
+  public oldValue: any;
 
-export default class Watcher {
-  private vm: Record<string, any>;
-  private getter: ((obj: Record<string, any>) => Record<string, any> | undefined) | undefined;
-  private callback: (newValue: any, oldValue: any) => any;
-  private value: any;
-
-  constructor(vm: Record<string, any>, expOrFn: string, callback: (newValue: any, oldValue: any) => any) {
+  constructor(vm: VueType, key: string, callback: (newValue: any) => any) {
     this.vm = vm;
-    this.getter = parsePath(expOrFn);
+    this.key = key;
     this.callback = callback;
-    this.value = this.get();
+    // 在 Dep 的静态属性上记录当前 watcher 对象，当访问数据的时候把 watcher 添加到 dep 的 subs 中
+    Dep.target = this;
+    // 访问vm[key]，触发一次 getter，让 dep 为当前 key 记录 watcher
+    this.oldValue = vm[key];
+    // 设为空，放置重复添加
+    Dep.target = null;
   }
 
-  // 读取 data.b.c 的值
-  get() {
-    (window as any).target = this;
-    const value = this.getter!.call(this.vm, this.vm);
-    (window as any).target = undefined;
-    return value;
-  }
-
-  // 更新
+  // 当数据发生变化的时候，即数据的 setter 触发的时候，更新视图
   update() {
-    const oldValue = this.value;
-    this.value = this.get();
-    this.callback.call(this.vm, this.value, oldValue);
+    let newValue = this.vm[this.key];
+    if (this.oldValue === newValue) {
+      return;
+    }
+    this.callback(newValue);
   }
 }
+
+export default Watcher;
 ```
 
 #### Watcher (依赖) 收集到哪里？
@@ -231,18 +213,29 @@ export default class Watcher {
 - 通知（notify）自己管理的依赖应该什么时候进行更新（update）。
 
 ```ts
-export default class Dep {
-  private subs: any[];
+import Watcher from './Watcher';
+
+/**
+ * 收集依赖，添加观察者(watcher)
+ * 通知所有观察者
+ */
+class Dep {
+  public subs: Watcher[];
+  public static target: Watcher | null;
 
   constructor() {
     this.subs = [];
   }
 
-  addSub(sub: any) {
-    this.subs.push(sub);
+  // 添加观察者
+  addSub(sub: Watcher) {
+    if (sub) {
+      this.subs.push(sub);
+    }
   }
 
-  removeSub(sub: any) {
+  // 移除观察者
+  removeSub(sub: Watcher) {
     if (this.subs.length) {
       const index = this.subs.indexOf(sub);
       if (index > -1) {
@@ -251,22 +244,15 @@ export default class Dep {
     }
   }
 
-  // window.target 实际上就是一个 watcher 对
-  // 我们在 dep 实例中收集 watche r对象的目的就是在数据发生更新时，能够调用已经收集到的 watcher 对象的 update 方法来更新视图
-  depend() {
-    if ((window as any).target) {
-      this.subs.push((window as any).target);
-    }
-  }
-
+  // 发送通知
   notify() {
-    // 拷贝一份，避免直接操作数据
-    const subs = this.subs;
-    for (let i = 0; i < subs.length; i++) {
-      subs[i].update();
-    }
+    this.subs.forEach((sub) => {
+      sub.update();
+    });
   }
 }
+
+export default Dep;
 ```
 
 #### 如何收集依赖
@@ -276,93 +262,78 @@ export default class Dep {
 让我们回到 Observe 的代码中：
 
 ```ts
-import Dep from './Dep';
-
 /**
- * Observer 类会附加到一个被侦测的 object 上
- * 一旦被附加上，Observer 会将 object 的所有属性转换为 getter/setter 的形式
- * 从而来收集依赖，并且当属性发生变化的时候，会通知这些依赖
+ * 数据代理
  */
-export default class Observer {
-  private value: any;
-
-  constructor(value: any) {
-    this.value = value;
-    // value 只可能是数组和对象
-    if (!Array.isArray(value)) {
-      this.walk(value);
-    }
-  }
-
-  /**
-   * 数据代理
-   */
-  defineReactive(data: Record<string, any>, key: PropertyKey, value: any) {
-    // 如果 value 是对象，就需要递归，让对象里每一个属性都转换成 getter/setter 的形式来侦测变化
-    if (typeof value === 'object') {
-      this.walk(value);
-    }
-    let dep = new Dep();
-    Object.defineProperty(data, key, {
-      enumerable: true,
-      configurable: true,
-      get() {
-        dep.depend();
-        return value;
-      },
-      set(newValue) {
-        if ((value = newValue)) {
-          return;
-        }
-        value = newValue;
-        dep.notify();
-      },
-    });
-  }
-
-  /**
-   * walk 会将每一个属性都转换成 getter/setter 的形式来侦测变化
-   * 这个方式只有在数据类型为 Object 的时候才会被调用
-   */
-  walk(obj: Record<string, any>) {
-    const keys = Object.keys(obj);
-    // 递归
-    for (let i = 0; i < keys.length; i++) {
-      this.defineReactive(obj, keys[i], obj[keys[i]]);
-    }
-  }
+defineReactive(obj: Record<string, any>, key: string, value: any) {
+  const that = this;
+  // 收集依赖，发送通知
+  let dep = new Dep();
+  // 如果 value 是对象，继续设置它里面的成员为响应式数据
+  this.walk(value);
+  Object.defineProperty(obj, key, {
+    configurable: true,
+    enumerable: true,
+    get() {
+      // 收集依赖
+      Dep.target && dep.addSub(Dep.target);
+      return value;
+    },
+    set(newValue) {
+      if (newValue === value) {
+        return;
+      }
+      value = newValue;
+      // 如果 newValue 是对象，设置 newValue 的成员为响应式
+      // 使用 that 的原因是 set 里面存在自己的 this
+      that.walk(newValue);
+      // 发送依赖
+      dep.notify();
+    },
+  });
 }
 ```
 
 你会发现，其实就是在 getter 中收集依赖，因为页面通过 {{ }} 渲染 data 里的变量时， 一定要读取该变量的值、所以只需要在解析 {{ }} 创建 watcher 的中，去触发该变量被代理后的 getter 方法。在 setter 中去触发依赖，通知依赖进行批量更新。
 
 ```ts
-export default class Watcher {
-  private vm: Record<string, any>;
-  private getter: ((obj: Record<string, any>) => Record<string, any> | undefined) | undefined;
-  private callback: (newValue: any, oldValue: any) => any;
-  private value: any;
+import Dep from './Dep';
+import { VueType } from './Vue';
+/**
+ * 当数据变化触发依赖，dep 通知所有的 Watcher 实例更新视图
+ * 自身实例化的时候往 dep 对象中添加自己
+ */
+class Watcher {
+  // Vue 实例
+  public vm: VueType;
+  // data 中的属性名称
+  public key: string;
+  // 当数据变化的时候，调用 callback 更新视图
+  public callback: (newValue: any) => any;
+  // 原来的旧值
+  public oldValue: any;
 
-  constructor(vm: Record<string, any>, expOrFn: string, callback: (newValue: any, oldValue: any) => any) {
+  constructor(vm: VueType, key: string, callback: (newValue: any) => any) {
     this.vm = vm;
-    this.getter = parsePath(expOrFn);
+    this.key = key;
     this.callback = callback;
-    this.value = this.get();
+    // 在 Dep 的静态属性上记录当前 watcher 对象，当访问数据的时候把 watcher 添加到 dep 的 subs 中
+    Dep.target = this;
+    // 访问vm[key]，触发一次 getter，让 dep 为当前 key 记录 watcher
+    this.oldValue = vm[key];
+    // 设为空，放置重复添加
+    Dep.target = null;
   }
 
-  // 读取 data.b.c 的值
-  get() {
-    (window as any).target = this;
-    const value = this.getter!.call(this.vm, this.vm);
-    (window as any).target = undefined;
-    return value;
-  }
-
-  // 更新
+  // 当数据发生变化的时候，即数据的 setter 触发的时候，更新视图
   update() {
-    const oldValue = this.value;
-    this.value = this.get();
-    this.callback.call(this.vm, this.value, oldValue);
+    let newValue = this.vm[this.key];
+    if (this.oldValue === newValue) {
+      return;
+    }
+    this.callback(newValue);
   }
 }
+
+export default Watcher;
 ```
