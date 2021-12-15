@@ -1,9 +1,9 @@
 /**
  * proxy测试
  */
-import vue from '../../src/core/vue'
+ import Vue from '../../src/vue'
 
-let vm = new vue({
+let vm = new Vue({
   data: {
     name: 'as',
     msg: 'sad'

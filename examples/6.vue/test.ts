@@ -1,7 +1,7 @@
 /**
  *  Compiler测试
  */
-import Vue from '../../src/core/vue'
+ import Vue from '../../src/vue'
 
 let vm = new Vue({
   el: "#app",
