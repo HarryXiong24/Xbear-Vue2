@@ -1,44 +1,16 @@
-# Mini-TS-Vue
+# Vue 响应式原理
 
-## Description
-
-A mini-vue framework developed by Typescript.
-
-## Usage
-
-```bash
-# If you want to use yarn.
-yarn
-yarn dev
-yarn build
-```
-
-```bash
-# If you want to use npm.
-npm install
-npm run dev
-npm run build
-```
-
-### Hint
-
-The simple example is located in the examples folder, so the packaging file entry set by Webpack is located in index.ts under the examples folder.
-
-The file in the directory under src is just an empty file. Please modify it yourself according to your needs.
-
-## Vue 响应式原理
-
-### Why I write this article
+## Why I write this article
 
 本篇章专门解释 Vue 的响应式原理。
 
 开门见山，展示出目前市面上最流行的 Vue 响应式原理图解。
 
-![img](./pubilc/assets/bind.png)
+![img](C:\Users\HARRIX~1\AppData\Local\Temp\企业微信截图_16395576371683.png)
 
 诚然，这张图概括的没有错误，但静态图只能描述数据流转的状态，但无法展现出各个步骤执行的时间顺序。在我深入的研究响应式原理后，我将结 各个步骤执行的时间顺序，进一步解释 Vue 响应式原理。
 
-### Let's begin
+## Let's begin
 
 首先有必须要说明，本篇章主要讲述 Vue 的响应式原理，所以在分析的过程中，我会淡化或者省略模板解析、vue 指令解析等一系列其他特征概念。并且，我将主要侧重流程、状态的运转说明，具体的代码实现我会提供但不会逐行解释。
 
@@ -62,7 +34,7 @@ The file in the directory under src is just an empty file. Please modify it your
 </body>
 ```
 
-#### First Step
+### First Step
 
 首先，在响应式原理概念里，vue 解析的时候会分两步走：
 
@@ -72,7 +44,7 @@ The file in the directory under src is just an empty file. Please modify it your
 
 我们分别看看这两步有什么作用。
 
-#### Observer 监听者
+### Observer 监听者
 
 Observer 的作用其实就是让 data 里的数据全部被监听，被代理，变成响应式的。
 
@@ -137,7 +109,7 @@ export default class Observer {
 }
 ```
 
-#### {{ }} -> Watcher 订阅者
+### {{ }} -> Watcher 订阅者
 
 在 Complie 的过程中，每次碰到一个 {{ }} 模板，就会创建一个 Watcher。
 
@@ -210,7 +182,7 @@ export default class Watcher {
 }
 ```
 
-#### Watcher (依赖) 收集到哪里？
+### Watcher (依赖) 收集到哪里？
 
 因为在 Vue 中，{{ }} 里的变量其实都会存在与 data 中，所以此时 Observer 和 Watcher 无形之中就建立了某种联系。
 
@@ -269,7 +241,7 @@ export default class Dep {
 }
 ```
 
-#### 如何收集依赖
+### 如何收集依赖
 
 读到这里，你就会发现，开篇的概念图我们基本已经讲完了。就剩最后 2 个流程：Dep 如何 添加订阅者 watcher，即如何收集依赖？还有如何触发依赖？
 

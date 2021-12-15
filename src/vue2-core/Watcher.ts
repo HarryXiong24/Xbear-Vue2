@@ -1,5 +1,5 @@
 import Dep from './Dep';
-import { VueType } from './vue';
+import { VueType } from './Vue';
 /**
  * 当数据变化触发依赖，dep 通知所有的 Watcher 实例更新视图
  * 自身实例化的时候往 dep 对象中添加自己

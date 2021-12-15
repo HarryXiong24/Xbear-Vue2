@@ -20,7 +20,7 @@ export interface VueType {
  * 负责调用 observer 监听 data 中所有属性的变化，转换成 getter/setter
  * 负责调用 compiler 解析指令/插值表达式
  */
-class Vue implements VueType {
+export class Vue implements VueType {
   public $options: Options;
   public $data: Record<string, any>;
   public $el: HTMLElement;
