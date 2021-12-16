@@ -16,7 +16,7 @@ let data: any = {
 // vm1.msg = "sa87ashjgd"
 // console.log(vm1)
 
-// // Proxy()测试方法
+// Proxy()测试方法
 let vm2 = proxy2(data);
 vm2.msg = 'sa87ashjgd';
 console.log(vm2);
