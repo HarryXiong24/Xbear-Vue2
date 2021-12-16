@@ -1,12 +1,15 @@
-import VueNext from '../../src/vue3-core/Vue';
-import { ref } from '../../src/vue3-core/Reactivity';
+import { VueNext, ref } from '../../src';
 
 const vm_next = new VueNext({
-  el: '#app',
+  el: '#vue3',
   setup() {
-    const name = ref('Lil-Vue');
+    const id = ref('000002');
+    const name = ref('Junny');
+    const msg = ref('I am Junny!');
     return {
+      id,
       name,
+      msg,
     };
   },
 });

@@ -16,11 +16,11 @@ const compileUtil = {
     },
   },
   getValue(vm: VueNext, expr: string) {
-    const { setupReturned } = vm;
-    type setupReturnedType = typeof setupReturned;
-    return expr.split('.').reduce((data, current: keyof setupReturnedType) => {
+    const { $setupReturned } = vm;
+    type $setupReturnedType = typeof $setupReturned;
+    return expr.split('.').reduce((data, current: keyof $setupReturnedType) => {
       return data[current];
-    }, setupReturned);
+    }, $setupReturned);
   },
 };
 

@@ -1,4 +1,4 @@
-import { Vue } from '../../src/index';
+import { Vue } from '../../src';
 
 const vm = new Vue({
   el: '#vue2',

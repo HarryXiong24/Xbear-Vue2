@@ -27,12 +27,13 @@ const watch = (callback: () => any) => {
     }, 0),
     dependencies: new Set<symbol>(),
   };
-  watcher.callback(); // In Vue 3.0, watchers are fired immediately after component mount.
+  // In Vue 3.0, watchers are fired immediately after component mount.
+  watcher.callback();
   watchers.push(watcher);
 };
 
 // 添加泛型（extends object 约束 T 是 object)，使用时也可以不手动指定，让类型推导自动推算
-const reactive = <T extends object>(target: T): T => {
+const reactive = <T extends Record<string | symbol, any>>(target: T): T => {
   // 记录 key Symbol(key) 的 Map
   const keyToSymbolMap = new Map<keyof T, symbol>();
   const getSymbolForKey = (key: keyof T): symbol => {
@@ -66,14 +67,14 @@ const reactive = <T extends object>(target: T): T => {
 };
 
 interface Ref<T> {
-  value: T;
+  value: T | undefined;
 }
 
-const ref = <T>(value: T): Ref<T> => {
+const ref = <T>(value: T | undefined): Ref<T> => {
   return reactive({ value });
 };
 
-const computed = <T>(fn: () => T): Ref<T> => {
+const computed = <T extends unknown>(fn: () => T): Ref<T> => {
   const r = ref<T>(undefined);
   watch(() => {
     r.value = fn();
