@@ -1,18 +1,6 @@
 import { Vue, VueNext } from '../src/index';
 
-let vm = new Vue({
-  el: '#app',
-  data: {
-    id: '000001',
-    msg: 'sad',
-    person: {
-      name: 'harry',
-    },
-  },
-});
-console.log(vm);
-
-// let vm_next = new VueNext({
+// let vm = new Vue({
 //   el: '#app',
 //   data: {
 //     id: '000001',
@@ -22,4 +10,16 @@ console.log(vm);
 //     },
 //   },
 // });
-// console.log(vm_next);
+// console.log('vue', vm);
+
+let vm_next = new VueNext({
+  el: '#app',
+  data: {
+    id: '000001',
+    msg: 'sad',
+    person: {
+      name: 'harry',
+    },
+  },
+});
+console.log('vue_next', vm_next);

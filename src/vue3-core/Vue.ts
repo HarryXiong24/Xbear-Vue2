@@ -35,29 +35,31 @@ export class Vue implements VueType {
     new Observer(this.$data);
     // 负责把 data 注入到 Vue 实例的 this 中
     // 因为目前的数据全部在 this.$data 上，而我们需要把数据放在 this 上，以供 Compiler 解析
-    this._proxyData(this.$data);
     // 由于使用了Proxy，因此需要使用Object.assign()拷贝至this对象
-    // Object.assign(this, this._proxyData(this.$data))
+    Object.assign(this, this._proxyData(this.$data));
     // 负责调用 Compiler 解析指令/插值表达式等
     new Compiler(this);
   }
 
   // 把 data 的属性注入到 Vue 实例中
   _proxyData(data: Record<string, any>) {
-    Object.keys(data).forEach((key) => {
-      Object.defineProperty(this, key, {
-        enumerable: true,
-        configurable: true,
-        get() {
-          return data[key];
-        },
-        set(newValue) {
-          if (newValue === data[key]) {
-            return;
-          }
-          data[key] = newValue;
-        },
-      });
+    // 模拟 Vue 实例
+    return new Proxy(data, {
+      // 执行代理行为的函数
+      // 当访问 vm 的成员会执行
+      get(target, key) {
+        console.log('get, key: ', key, target[key as string]);
+        return target[key as string];
+      },
+      // 当设置 vm 的成员会执行
+      set(target, key, newValue) {
+        console.log('set, key: ', key, newValue);
+        if (target[key as string] === newValue) {
+          return true;
+        }
+        target[key as string] = newValue;
+        return true;
+      },
     });
   }
 }

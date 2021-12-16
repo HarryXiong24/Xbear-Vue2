@@ -31,26 +31,32 @@ class Observer {
     let dep = new Dep();
     // 如果 value 是对象，继续设置它里面的成员为响应式数据
     this.walk(value);
-    Object.defineProperty(obj, key, {
-      configurable: true,
-      enumerable: true,
-      get() {
-        // 收集依赖
-        Dep.target && dep.addSub(Dep.target);
-        return value;
-      },
-      set(newValue) {
-        if (newValue === value) {
-          return;
-        }
-        value = newValue;
-        // 如果 newValue 是对象，设置 newValue 的成员为响应式
-        // 使用 that 的原因是 set 里面存在自己的 this
-        that.walk(newValue);
-        // 发送依赖
-        dep.notify();
-      },
-    });
+    Object.assign(
+      obj,
+      new Proxy(obj, {
+        // 执行代理行为的函数
+        // 当访问 vm 的成员会执行
+        get(target, key) {
+          console.log('get, key: ', key, target[key as string]);
+          Dep.target && dep.addSub(Dep.target);
+          return target[key as string];
+        },
+        // 当设置 vm 的成员会执行
+        set(target, key, newValue) {
+          console.log('set, key: ', key, newValue);
+          if (target[key as string] === newValue) {
+            return true;
+          }
+          target[key as string] = newValue;
+          // 如果 newValue 是对象，设置 newValue 的成员为响应式
+          // 使用 that 的原因是 set 里面存在自己的 this
+          that.walk(newValue);
+          // 发送依赖
+          dep.notify();
+          return true;
+        },
+      })
+    );
   }
 }
 
