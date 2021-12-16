@@ -13,11 +13,6 @@
     "noUnusedLocals": true,
     "esModuleInterop": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src", "tests/vue3-core"],
+  "exclude": ["node_modules"]
 }
-
