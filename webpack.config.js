@@ -23,33 +23,33 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        loader: "babel-loader",
+        loader: 'babel-loader',
         options: {
           presets: [
             '@babel/preset-env',
             [
               '@babel/preset-typescript',
               {
-                allExtensions: true
-              }
-            ]
-          ]
-        }
+                allExtensions: true,
+              },
+            ],
+          ],
+        },
       },
       {
         test: /\.tsx?$/,
-        loader: "babel-loader",
+        loader: 'babel-loader',
         options: {
           presets: [
             '@babel/preset-env',
             [
               '@babel/preset-typescript',
               {
-                allExtensions: true
-              }
-            ]
-          ]
-        }
+                allExtensions: true,
+              },
+            ],
+          ],
+        },
       },
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
@@ -61,12 +61,12 @@ module.exports = {
       {
         // 处理less资源
         test: /\.scss$/,
-        use: ['style-loader', 'css-loader', 'scss-loader']
+        use: ['style-loader', 'css-loader', 'scss-loader'],
       },
       {
         // 处理css资源
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ['style-loader', 'css-loader'],
       },
       {
         // 处理图片资源
@@ -76,13 +76,13 @@ module.exports = {
           limit: 8 * 1024,
           name: '[hash:10].[ext]',
           // 关闭es6模块化 esModule: false, outputPath: 'imgs'
-        }
+        },
       },
       {
         // 处理html中img资源
         test: /\.html$/,
-        loader: 'html-loader'
-      }
+        loader: 'html-loader',
+      },
     ],
   },
   resolve: {
@@ -97,16 +97,16 @@ module.exports = {
       inject: 'body',
       minify: {
         removeAttributeQuotes: true, // 删除属性的双引号，除了一些特殊的删除不了以外都能删除
-        collapseWhitespace: true,    // 折叠空行将所有代码变成一行
-        removeComments: true         // 移除注释
+        collapseWhitespace: true, // 折叠空行将所有代码变成一行
+        removeComments: true, // 移除注释
       },
-      hash: true // 给打包后在模板中引入的文件名生成hash戳，防止缓存
+      hash: true, // 给打包后在模板中引入的文件名生成hash戳，防止缓存
     }),
   ],
   devServer: {
     contentBase: resolve(__dirname, 'dist'),
     compress: true,
     port: 8080,
-    open: true
+    open: true,
   },
-}
+};

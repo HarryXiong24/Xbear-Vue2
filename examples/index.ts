@@ -1,25 +1,25 @@
 import { Vue, VueNext } from '../src/index';
 
-// let vm = new Vue({
-//   el: '#app',
-//   data: {
-//     id: '000001',
-//     msg: 'sad',
-//     person: {
-//       name: 'harry',
-//     },
-//   },
-// });
-// console.log('vue', vm);
+let vm = new Vue({
+  el: '#vue2',
+  data: {
+    person: {
+      id: '000001',
+      name: 'Harry',
+    },
+    msg: 'I am Harry!',
+  },
+});
+console.log('vue', vm);
 
 let vm_next = new VueNext({
-  el: '#app',
+  el: '#vue3',
   data: {
-    id: '000001',
-    msg: 'sad',
     person: {
-      name: 'harry',
+      name: 'Junny',
+      sex: 'female',
     },
+    msg: 'I am Junny!',
   },
 });
 console.log('vue_next', vm_next);
