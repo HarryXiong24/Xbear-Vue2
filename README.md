@@ -1,8 +1,8 @@
-# Mini-TS-Vue
+# Xbear-Vue2
 
 ## Description
 
-A mini-vue framework developed by Typescript.
+A mini-vue2 framework developed by Typescript.
 
 ## Usage
 
